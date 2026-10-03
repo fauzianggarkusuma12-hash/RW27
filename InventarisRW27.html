@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Formulir Daftar Inventaris - RW 27 Tegalboto Lor</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    @media print {
+      body {
+        background: #ffffff !important;
+        color: #000000 !important;
+        font-size: 10pt;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .print-container {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+      }
+      table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+      }
+      th, td {
+        border: 1px solid #000 !important;
+        padding: 5px 6px !important;
+        color: #000 !important;
+      }
+      @page {
+        size: A4 landscape;
+        margin: 1.2cm 1cm 1.2cm 1cm;
+      }
+    }
+    .logo-container:hover .logo-overlay {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen font-sans">
+
+  <!-- Navigasi Atas (Sembunyi Saat Cetak) -->
+  <header class="no-print bg-emerald-800 text-white shadow-md sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center space-x-3">
+        <i data-lucide="archive" class="w-6 h-6 text-emerald-300"></i>
+        <div>
+          <h1 class="text-base md:text-lg font-bold tracking-tight">Sistem Inventaris RW 27 Tegalboto Lor</h1>
+          <p class="text-xs text-emerald-200">Kel. Sumbersari, Kec. Sumbersari, Kab. Jember (Landscape)</p>
+        </div>
+      </div>
+      
+      <div class="flex items-center flex-wrap gap-2 text-sm">
+        <!-- Tombol Ganti Logo -->
+        <label class="flex items-center gap-1.5 bg-emerald-700 hover:bg-emerald-600 text-white px-3 py-1.5 rounded-lg shadow-sm font-medium transition cursor-pointer">
+          <i data-lucide="image" class="w-4 h-4"></i>
+          <span>Ganti Logo</span>
+          <input type="file" id="input-logo-top" class="hidden" accept="image/*" onchange="handleLogoUpload(event)">
+        </label>
+        <button onclick="toggleModal('modal-tambah')" class="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-1.5 rounded-lg shadow-sm font-medium transition">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i>
+          <span>Tambah Barang</span>
+        </button>
+        <button onclick="window.print()" class="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white px-3.5 py-1.5 rounded-lg shadow-sm font-medium transition">
+          <i data-lucide="printer" class="w-4 h-4"></i>
+          <span>Cetak A4 (Landscape)</span>
+        </button>
+        <button onclick="toggleModal('modal-sync')" class="flex items-center gap-1.5 bg-slate-700 hover:bg-slate-600 text-white px-3.5 py-1.5 rounded-lg shadow-sm font-medium transition">
+          <i data-lucide="cloud" class="w-4 h-4"></i>
+          <span>Sinkronisasi</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Notifikasi Petunjuk Logo (No Print) -->
+  <div class="no-print max-w-7xl mx-auto px-4 mt-4">
+    <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-3 text-xs md:text-sm text-emerald-900 flex items-start justify-between gap-3 shadow-sm">
+      <div class="flex items-start gap-2">
+        <i data-lucide="info" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
+        <span><strong>Tips Logo:</strong> Anda bisa mengklik langsung logo di kop surat atau tombol <em>Ganti Logo</em> di atas untuk mengunggah file logo PNG/JPG dari perangkat.</span>
+      </div>
+      <button onclick="resetLogo()" class="text-xs text-red-600 hover:underline font-semibold shrink-0">Reset Logo Default</button>
+    </div>
+  </div>
+
+  <!-- Area Dokumen Cetak -->
+  <main class="max-w-[1200px] mx-auto p-4 md:p-8 my-6 bg-white rounded-xl shadow-lg border border-slate-200 print-container">
+    
+    <!-- KOP SURAT RESMI DENGAN LOGO YANG BISA DIUPLOAD -->
+    <div class="border-b-4 border-double border-slate-900 pb-3 mb-6 relative">
+      <div class="flex items-center justify-between">
+        <!-- Logo Daerah / Custom Logo -->
+        <div class="w-28 flex flex-col items-center justify-center shrink-0">
+          <label class="logo-container relative block cursor-pointer group" title="Klik untuk mengganti logo">
+            <img 
+              id="kop-logo-img"
+              src="https://upload.wikimedia.org/wikipedia/commons/e/e0/Lambang_Kabupaten_Jember.png" 
+              alt="Logo Kop Surat" 
+              class="h-20 w-auto object-contain max-w-[100px]"
+            >
+            <!-- Overlay indikator klik saat hover di web (No Print) -->
+            <div class="logo-overlay no-print absolute inset-0 bg-black/50 text-white text-[10px] font-bold rounded flex items-center justify-center opacity-0 transition">
+              Ubah Logo
+            </div>
+            <input type="file" id="input-logo-kop" class="hidden" accept="image/*" onchange="handleLogoUpload(event)">
+          </label>
+        </div>
+
+        <!-- Teks Kop Surat Tengah -->
+        <div class="text-center flex-1 px-4">
+          <h2 class="text-xl md:text-2xl font-black uppercase tracking-wider text-slate-900 leading-tight">
+            RUKUN WARGA (RW) 27
+          </h2>
+          <h3 class="text-base md:text-lg font-bold uppercase text-slate-800 leading-tight">
+            KELURAHAN SUMBERSARI - KECAMATAN SUMBERSARI
+          </h3>
+          <h4 class="text-sm md:text-base font-semibold uppercase text-slate-700 leading-tight">
+            TEGALBOTO LOR - KABUPATEN JEMBER
+          </h4>
+        </div>
+
+        <!-- Spacer Kanan Penyeimbang Kop -->
+        <div class="w-28 shrink-0"></div>
+      </div>
+
+      <div class="border-t border-slate-900 pt-2 mt-3 text-center">
+        <h1 class="text-base md:text-lg font-black uppercase tracking-widest text-slate-950 underline underline-offset-4">
+          FORMULIR DAFTAR INVENTARIS BARANG
+        </h1>
+      </div>
+    </div>
+
+    <!-- Tabel Daftar Inventaris -->
+    <div class="overflow-x-auto">
+      <table class="w-full text-xs md:text-sm border border-slate-900 text-left">
+        <thead class="bg-slate-100 text-slate-900 uppercase font-bold text-center border-b border-slate-900">
+          <tr>
+            <th class="border border-slate-900 px-2 py-2 w-10">No</th>
+            <th class="border border-slate-900 px-2 py-2 w-24">Kode</th>
+            <th class="border border-slate-900 px-2 py-2">Nama Barang</th>
+            <th class="border border-slate-900 px-2 py-2">Spesifikasi / Merk / Type</th>
+            <th class="border border-slate-900 px-2 py-2 w-16">Jumlah</th>
+            <th class="border border-slate-900 px-2 py-2 w-16">Satuan</th>
+            <th class="border border-slate-900 px-2 py-2 w-28">Kondisi</th>
+            <th class="border border-slate-900 px-2 py-2 w-32">Asal Perolehan</th>
+            <th class="border border-slate-900 px-2 py-2 w-16">Tahun</th>
+            <th class="border border-slate-900 px-2 py-2 w-28">Nilai (Rp)</th>
+            <th class="border border-slate-900 px-2 py-2">Lokasi / Penyimpanan</th>
+            <th class="border border-slate-900 px-2 py-2">Keterangan</th>
+            <th class="border border-slate-900 px-2 py-2 w-16 no-print">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="inventory-table-body" class="divide-y divide-slate-300">
+          <!-- Diisi via JavaScript -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Kolom Tanda Tangan Resmi (Dikosongkan Sesuai Permintaan) -->
+    <div class="mt-10 grid grid-cols-2 gap-12 text-center text-xs md:text-sm">
+      <!-- Kolom Kiri: Sie Sarpras / Pembuat -->
+      <div class="flex flex-col justify-between h-36">
+        <div>
+          <p class="font-medium text-slate-800">Dibuat Oleh,</p>
+          <p class="font-bold text-slate-900">Sie. Sarpras / Pengurus RW 27</p>
+        </div>
+        <div>
+          <div class="border-b border-dotted border-slate-800 w-2/3 mx-auto mb-1"></div>
+          <p class="text-xs text-slate-600">Nama Terang / NIP / NIK</p>
+        </div>
+      </div>
+
+      <!-- Kolom Kanan: Mengetahui Ketua RW -->
+      <div class="flex flex-col justify-between h-36">
+        <div>
+          <p class="font-medium text-slate-800">Jember, .........................................</p>
+          <p class="font-bold text-slate-900">Mengetahui,</p>
+          <p class="font-bold text-slate-900">Ketua RW 27 Tegalboto Lor</p>
+        </div>
+        <div>
+          <div class="border-b border-dotted border-slate-800 w-2/3 mx-auto mb-1"></div>
+          <p class="text-xs text-slate-600">Nama Terang: .......................................</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- MODAL: Tambah/Edit Barang (No Print) -->
+  <div id="modal-tambah" class="no-print fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6">
+      <div class="flex justify-between items-center pb-3 border-b">
+        <h3 class="text-lg font-bold text-slate-900" id="modal-title">Tambah Barang Inventaris</h3>
+        <button onclick="toggleModal('modal-tambah')" class="text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="form-barang" class="mt-4 space-y-3 text-sm">
+        <input type="hidden" id="item-index" value="-1">
+        
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-medium text-slate-700">Kode Barang</label>
+            <input type="text" id="in-kode" placeholder="Contoh: INV-01" class="w-full border rounded-lg p-2 mt-1 focus:ring-2 focus:ring-emerald-500 outline-none">
+          </div>
+          <div>
+            <label class="block font-medium text-slate-700">Tahun Perolehan</label>
+            <input type="number" id="in-tahun" placeholder="2024" class="w-full border rounded-lg p-2 mt-1 focus:ring-2 focus:ring-emerald-500 outline-none">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-medium text-slate-700">Nama Barang *</label>
+          <input type="text" id="in-nama" required placeholder="Contoh: Kursi Lipat" class="w-full border rounded-lg p-2 mt-1 focus:ring-2 focus:ring-emerald-500 outline-none">
+        </div>
+
+        <div>
+          <label class="block font-medium text-slate-700">Spesifikasi / Merk / Type</label>
+          <input type="text" id="in-spek" placeholder="Rangka pipa, warna hitam" class="w-full border rounded-lg p-2 mt-1 focus:ring-2 focus:ring-emerald-500 outline-none">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-medium text-slate-700">Jumlah *</label>
+            <input type="number" id="in-jumlah" required min="1" value="1" class="w-full border rounded-lg p-2 mt-1 focus:ring-2 focus:ring-emerald-500 outline-none">
+          </div>
+          <div>
+            <label class="block font-medium text-slate-700">Satuan</label>
+            <input type="text" id="in-satuan" placeholder="Unit / Set / Buah" value="Unit" class="w-full border rounded-lg p-2 mt-1 focus:ring-2 focus:ring-emerald-500 outline-none">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-medium text-slate-700">Kondisi</label>
+            <select id="in-kondisi" class="w-full border rounded-lg p-2 mt-1 focus:ring-2 focus:ring-emerald-500 outline-none">
+              <option value="Baik">Baik</option>
+              <option value="Rusak Ringan">Rusak Ringan</option>
+              <option value="Rusak Berat">Rusak Berat</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-medium text-slate-700">Asal Perolehan</label>
+            <select id="in-asal" class="w-full border rounded-lg p-2 mt-1 focus:ring-2 focus:ring-emerald-500 outline-none">
+              <option value="Pembelian RW">Pembelian RW</option>
+              <option value="Hibah / Warga">Hibah / Bantuan Warga</option>
+              <option value="Bantuan Pemerintah">Bantuan Kelurahan/Pemkab</option>
+              <option value="Lainnya">Lainnya</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-medium text-slate-700">Nilai Perolehan (Rp)</label>
+            <input type="number" id="in-nilai" placeholder="0" class="w-full border rounded-lg p-2 mt-1 focus:ring-2 focus:ring-emerald-500 outline-none">
+          </div>
+          <div>
+            <label class="block font-medium text-slate-700">Lokasi Penyimpanan</label>
+            <input type="text" id="in-lokasi" placeholder="Gudang / Balai RW" class="w-full border rounded-lg p-2 mt-1 focus:ring-2 focus:ring-emerald-500 outline-none">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-medium text-slate-700">Keterangan</label>
+          <input type="text" id="in-keterangan" placeholder="Catatan tambahan..." class="w-full border rounded-lg p-2 mt-1 focus:ring-2 focus:ring-emerald-500 outline-none">
+        </div>
+
+        <div class="flex justify-end gap-2 pt-4 border-t">
+          <button type="button" onclick="toggleModal('modal-tambah')" class="px-4 py-2 border rounded-lg hover:bg-slate-50">Batal</button>
+          <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-medium">Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Sinkronisasi & Backup (No Print) -->
+  <div id="modal-sync" class="no-print fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6">
+      <div class="flex justify-between items-center pb-3 border-b">
+        <h3 class="text-lg font-bold text-slate-900">Sinkronisasi & Berbagi Data</h3>
+        <button onclick="toggleModal('modal-sync')" class="text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="mt-4 space-y-4 text-sm">
+        <div>
+          <h4 class="font-semibold text-slate-800 mb-1">1. Cadangan Berkas (JSON)</h4>
+          <p class="text-xs text-slate-600 mb-2">Simpan atau kirim berkas database ini ke pengurus lain via WA.</p>
+          <div class="flex gap-2">
+            <button onclick="backupJSON()" class="flex-1 py-2 bg-slate-100 hover:bg-slate-200 border rounded-lg font-medium text-center">Unduh Cadangan</button>
+            <label class="flex-1 py-2 bg-slate-100 hover:bg-slate-200 border rounded-lg font-medium text-center cursor-pointer">
+              Buka Cadangan
+              <input type="file" id="file-import" class="hidden" accept=".json" onchange="importJSON(event)">
+            </label>
+          </div>
+        </div>
+
+        <div class="border-t pt-3">
+          <h4 class="font-semibold text-slate-800 mb-1">2. Hubungkan URL Spreadsheet</h4>
+          <input type="url" id="sheet-api-url" placeholder="https://script.google.com/macros/s/.../exec" class="w-full border rounded-lg p-2 text-xs focus:ring-2 focus:ring-emerald-500 outline-none">
+          <button onclick="simpanConfigApi()" class="mt-2 px-3 py-1.5 bg-emerald-700 text-white rounded text-xs font-medium hover:bg-emerald-600">Simpan Tautan</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPT LOGIKA -->
+  <script>
+    lucide.createIcons();
+
+    const DEFAULT_LOGO_URL = "https://upload.wikimedia.org/wikipedia/commons/e/e0/Lambang_Kabupaten_Jember.png";
+
+    const defaultData = [
+      { kode: 'INV-001', nama: 'Tenda Terop Besi', spek: '4 x 6 meter, Rangka Pipa', jumlah: 2, satuan: 'Set', kondisi: 'Baik', asal: 'Bantuan Pemerintah', tahun: 2023, nilai: 7000000, lokasi: 'Gudang RW', keterangan: 'Lengkap terpal' },
+      { kode: 'INV-002', nama: 'Kursi Plastik Napolly', spek: 'Tipe 101 Warna Hijau', jumlah: 100, satuan: 'Buah', kondisi: 'Baik', asal: 'Pembelian RW', tahun: 2024, nilai: 4500000, lokasi: 'Balai RW 27', keterangan: 'Cap RT/RW 27' },
+      { kode: 'INV-003', nama: 'Wireless Portable Sound', spek: '12 Inch + 2 Mic Pegang', jumlah: 1, satuan: 'Unit', kondisi: 'Baik', asal: 'Hibah / Warga', tahun: 2024, nilai: 1850000, lokasi: 'Rumah Pengurus', keterangan: 'Siap pakai' }
+    ];
+
+    let inventory = JSON.parse(localStorage.getItem('rw27_inventory')) || defaultData;
+
+    // Inisialisasi Logo dari LocalStorage
+    function initLogo() {
+      const savedLogo = localStorage.getItem('rw27_custom_logo');
+      const imgEl = document.getElementById('kop-logo-img');
+      if (savedLogo) {
+        imgEl.src = savedLogo;
+      } else {
+        imgEl.src = DEFAULT_LOGO_URL;
+      }
+    }
+
+    // Fungsi Upload Logo
+    function handleLogoUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      // Validasi tipe file gambar
+      if (!file.type.startsWith('image/')) {
+        alert('Mohon pilih file gambar (PNG, JPG, atau JPEG).');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const base64Img = e.target.result;
+        // Simpan ke localStorage
+        localStorage.setItem('rw27_custom_logo', base64Img);
+        // Perbarui gambar kop
+        document.getElementById('kop-logo-img').src = base64Img;
+        alert('Logo berhasil diperbarui dan disimpan!');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Fungsi Reset Logo ke Default
+    function resetLogo() {
+      if (confirm('Kembalikan logo ke lambang default Kabupaten Jember?')) {
+        localStorage.removeItem('rw27_custom_logo');
+        document.getElementById('kop-logo-img').src = DEFAULT_LOGO_URL;
+      }
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('inventory-table-body');
+      tbody.innerHTML = '';
+
+      if (inventory.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="13" class="text-center py-6 text-slate-400">Belum ada barang terdaftar.</td></tr>`;
+        return;
+      }
+
+      inventory.forEach((item, idx) => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50 transition";
+        tr.innerHTML = `
+          <td class="border border-slate-900 px-2 py-1 text-center font-medium">${idx + 1}</td>
+          <td class="border border-slate-900 px-2 py-1 font-mono text-center">${item.kode || '-'}</td>
+          <td class="border border-slate-900 px-2 py-1 font-semibold">${item.nama}</td>
+          <td class="border border-slate-900 px-2 py-1">${item.spek || '-'}</td>
+          <td class="border border-slate-900 px-2 py-1 text-center font-bold">${item.jumlah}</td>
+          <td class="border border-slate-900 px-2 py-1 text-center">${item.satuan || 'Unit'}</td>
+          <td class="border border-slate-900 px-2 py-1 text-center">${item.kondisi}</td>
+          <td class="border border-slate-900 px-2 py-1 text-center">${item.asal}</td>
+          <td class="border border-slate-900 px-2 py-1 text-center">${item.tahun || '-'}</td>
+          <td class="border border-slate-900 px-2 py-1 text-right">${item.nilai ? Number(item.nilai).toLocaleString('id-ID') : '-'}</td>
+          <td class="border border-slate-900 px-2 py-1">${item.lokasi || '-'}</td>
+          <td class="border border-slate-900 px-2 py-1">${item.keterangan || '-'}</td>
+          <td class="border border-slate-900 px-2 py-1 text-center no-print">
+            <div class="flex items-center justify-center gap-1">
+              <button onclick="editItem(${idx})" class="p-1 hover:text-blue-600" title="Edit"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
+              <button onclick="deleteItem(${idx})" class="p-1 hover:text-red-600" title="Hapus"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+      lucide.createIcons();
+    }
+
+    function toggleModal(id) {
+      document.getElementById(id).classList.toggle('hidden');
+    }
+
+    document.getElementById('form-barang').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const idx = parseInt(document.getElementById('item-index').value);
+
+      const item = {
+        kode: document.getElementById('in-kode').value,
+        nama: document.getElementById('in-nama').value,
+        spek: document.getElementById('in-spek').value,
+        jumlah: parseInt(document.getElementById('in-jumlah').value) || 1,
+        satuan: document.getElementById('in-satuan').value,
+        kondisi: document.getElementById('in-kondisi').value,
+        asal: document.getElementById('in-asal').value,
+        tahun: document.getElementById('in-tahun').value,
+        nilai: document.getElementById('in-nilai').value ? Number(document.getElementById('in-nilai').value) : 0,
+        lokasi: document.getElementById('in-lokasi').value,
+        keterangan: document.getElementById('in-keterangan').value,
+      };
+
+      if (idx >= 0) {
+        inventory[idx] = item;
+      } else {
+        inventory.push(item);
+      }
+
+      saveData();
+      renderTable();
+      toggleModal('modal-tambah');
+      this.reset();
+      document.getElementById('item-index').value = "-1";
+    });
+
+    function editItem(idx) {
+      const itm = inventory[idx];
+      document.getElementById('item-index').value = idx;
+      document.getElementById('in-kode').value = itm.kode || '';
+      document.getElementById('in-nama').value = itm.nama || '';
+      document.getElementById('in-spek').value = itm.spek || '';
+      document.getElementById('in-jumlah').value = itm.jumlah || 1;
+      document.getElementById('in-satuan').value = itm.satuan || 'Unit';
+      document.getElementById('in-kondisi').value = itm.kondisi || 'Baik';
+      document.getElementById('in-asal').value = itm.asal || 'Pembelian RW';
+      document.getElementById('in-tahun').value = itm.tahun || '';
+      document.getElementById('in-nilai').value = itm.nilai || '';
+      document.getElementById('in-lokasi').value = itm.lokasi || '';
+      document.getElementById('in-keterangan').value = itm.keterangan || '';
+      
+      document.getElementById('modal-title').innerText = "Edit Data Inventaris";
+      toggleModal('modal-tambah');
+    }
+
+    function deleteItem(idx) {
+      if (confirm(`Hapus barang "${inventory[idx].nama}"?`)) {
+        inventory.splice(idx, 1);
+        saveData();
+        renderTable();
+      }
+    }
+
+    function saveData() {
+      localStorage.setItem('rw27_inventory', JSON.stringify(inventory));
+    }
+
+    function backupJSON() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(inventory, null, 2));
+      const a = document.createElement('a');
+      a.setAttribute("href", dataStr);
+      a.setAttribute("download", "Inventaris_RW27_Landscape.json");
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+
+    function importJSON(event) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (Array.isArray(imported)) {
+            inventory = imported;
+            saveData();
+            renderTable();
+            alert("Data berhasil dipulihkan!");
+            toggleModal('modal-sync');
+          }
+        } catch (err) {
+          alert("Berkas tidak valid.");
+        }
+      };
+      reader.readAsText(event.target.files[0]);
+    }
+
+    function simpanConfigApi() {
+      const url = document.getElementById('sheet-api-url').value;
+      localStorage.setItem('rw27_sheet_api', url);
+      alert('Tautan sinkronisasi tersimpan.');
+    }
+
+    // Eksekusi awal
+    initLogo();
+    renderTable();
+  </script>
+</body>
+</html>
